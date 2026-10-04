@@ -29,7 +29,7 @@ node --version
 pi --version
 ```
 
-### 2. 개인 프로젝트 폴더에 클론
+### 2. 독립 앱으로 사용하기
 
 터미널에서 원하는 개인 프로젝트 폴더로 이동한 뒤 실행합니다. `<repository-url>`은 **이 저장소의 실제 Git URL**로 바꾸세요. 꺾쇠괄호까지 그대로 입력하지 않습니다.
 
@@ -40,11 +40,55 @@ cd learning-tuna
 
 저장소를 `.pi`라는 이름으로 클론하지 않습니다. 앱 내부의 `.pi/settings.json`이 앱을 로드하므로, 이 독립 앱에는 별도 `pi install`이나 프로젝트의 `npm install`이 필요하지 않습니다.
 
+<a id="study-root"></a>
+
+### 3. 자료가 있는 root 폴더에서 사용하기
+
+이미 책·논문·코드 등 공부할 자료가 있는 폴더에서 Pi를 실행하고 싶다면, 그 폴더를 학습 작업 폴더로 사용합니다.
+아래 구조에서 `root`는 파일 시스템의 `/`가 아니라 **내가 공부할 프로젝트 폴더**를 뜻합니다.
+
+```text
+root/
+├── materials/          # Existing study material
+├── learning_tuna/      # Cloned app code
+├── .pi/settings.json   # Local package registration (created by pi install)
+└── learning/           # Plans, records, and home page (created during use)
+```
+
+**터미널에서 root로 이동한 상태**로 실행합니다.
+
+```sh
+git clone https://github.com/comwitch/Pi_learning_tuna.git learning_tuna
+pi install --local ./learning_tuna
+pi
+```
+
+이미 `root/learning_tuna/`에 클론했다면 `git clone`은 건너뛰고 등록부터 실행하세요. 로컬 등록은 최초 한 번만 필요합니다.
+**클론만 하고 root에서 Pi를 켜는 것으로는 앱이 자동 로드되지 않습니다.** Pi는 하위 앱 폴더의 `.pi` 설정을 자동으로 찾아 로드하지 않으므로 `pi install --local`로 root에 등록해야 합니다.
+
+등록 후 프로젝트 신뢰를 승인합니다. 이미 root에서 Pi가 열려 있었다면 `/reload`를 실행하세요. 이어 Pi 내부에서 다음을 사용합니다.
+
+```text
+/learn init
+/learn track
+/learn today
+```
+
+학습 자료는 `materials/`의 파일이나 root 내부의 경로로 지정하면 됩니다. 앱 코드가 있는 `learning_tuna/`로 이동할 필요는 없습니다.
+
+- 앱 코드: `root/learning_tuna/`
+- 계획·학습 기록: **`root/learning/`**
+- Obsidian 메인 페이지: **`root/learning/index.md`**
+- 다음 날: 같은 **root에서** `pi`를 실행하고 `/learn today`로 이어가기
+
+앱 폴더에서 Pi를 실행하면 `root/learning_tuna/learning/`에 별도의 학습 기록이 생깁니다. 하나의 학습을 이어가려면 실행 위치를 섞지 마세요.
+root를 Git으로 관리한다면 개인정보 보호를 위해 **root의 `.gitignore`에 `learning/`을 추가**하세요. 하위 앱의 `.gitignore`는 root의 학습 기록에 적용되지 않습니다. 기록은 별도로 백업합니다.
+
 ## 시작하기
 
 ### 1. 앱 실행과 AI 연결
 
-**터미널**에서 앱 루트로 이동해 실행합니다.
+**독립 앱 방식**은 터미널에서 앱 루트로 이동해 실행합니다. 위의 **자료 root 방식**으로 등록했다면 앱 폴더가 아닌 자료 root에서 `pi`를 실행하세요.
 
 ```sh
 cd learning-tuna
@@ -55,7 +99,7 @@ pi
 AI 제공자가 아직 연결되지 않았다면 **Pi 내부**에서 `/login`으로 연결한 뒤 `/model`로 사용할 모델을 선택합니다.
 
 이미 이 폴더에서 Pi를 실행 중이었다면 **Pi 내부**에서 `/reload`하여 최신 앱을 로드합니다. 사용자 설정에 같은 `/learn` 명령이나 같은 이름의 Skill이 설치되어 있다면 중복 등록을 피하세요.
-항상 앱 루트에서 Pi를 실행하세요. 데이터는 현재 작업 폴더의 `learning/`에 저장합니다.
+선택한 방식에 맞는 같은 작업 폴더에서 Pi를 실행하세요. 데이터는 현재 작업 폴더의 `learning/`에 저장합니다.
 
 ### 2. 첫 학습 계획 생성
 
@@ -78,7 +122,7 @@ AI가 자료·목표·기간을 질문하면 답하고, 제안한 계획을 확�
 
 ### 3. 다음 날 다시 시작
 
-터미널에서 같은 앱 폴더로 이동해 `pi`를 실행한 뒤, Pi 내부에서 `/learn today`를 실행합니다. 새 대화 세션이어도 저장된 기록을 읽고 이어가도록 구성되어 있습니다.
+터미널에서 같은 학습 작업 폴더(독립 앱 폴더 또는 등록한 자료 root)로 이동해 `pi`를 실행한 뒤, Pi 내부에서 `/learn today`를 실행합니다. 새 대화 세션이어도 저장된 기록을 읽고 이어가도록 구성되어 있습니다.
 **`/learn init`을 매일 실행할 필요는 없습니다.** 목표나 기간을 바꾸려면 기존 계획을 변경하려는 의도를 AI에게 먼저 알려주세요.
 
 ### 명령어 요약
@@ -97,7 +141,7 @@ AI가 자료·목표·기간을 질문하면 답하고, 제안한 계획을 확�
 | `/learn help` | 앱 명령어 안내 |
 
 `/learn schedule`은 AI가 로컬 문서 생성 스크립트를 실행하지 못했거나, 문서를 다시 생성할 때 사용합니다. 승인된 `learning/schedule.json`이 먼저 있어야 합니다.
-`/learn`을 찾을 수 없다면 앱 루트에서 실행했는지, 프로젝트 신뢰를 승인했는지 확인하고 `/reload`하세요.
+`/learn`을 찾을 수 없다면 선택한 학습 작업 폴더에서 실행했는지, 자료 root 방식에서는 로컬 등록을 했는지, 프로젝트 신뢰를 승인했는지 확인하고 `/reload`하세요.
 
 ## 학습 계획 생성 과정
 

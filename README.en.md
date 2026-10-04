@@ -31,7 +31,7 @@ node --version
 pi --version
 ```
 
-### 2. Clone into your personal projects directory
+### 2. Use it as a standalone app
 
 In your terminal, navigate to your preferred parent directory, then run:
 
@@ -44,11 +44,55 @@ Replace `<repository-url>` with this repository's actual Git URL. Do not enter t
 
 Do **not** name the checkout `.pi`. The app's own `.pi/settings.json` loads it as a local Pi package. Standalone use requires neither a separate `pi install` nor a project-level `npm install`.
 
+<a id="study-root"></a>
+
+### 3. Use it from a root folder containing study material
+
+If you already have a directory containing books, papers, or code, you can run Pi from that directory and load this app as a local package.
+Here, `root` means **your study project directory**, not the filesystem root `/`.
+
+```text
+root/
+├── materials/          # Existing study material
+├── learning_tuna/      # Cloned app code
+├── .pi/settings.json   # Local package registration (created by pi install)
+└── learning/           # Plans, records, and home page (created during use)
+```
+
+Run the following **in your terminal while inside root**:
+
+```sh
+git clone https://github.com/comwitch/Pi_learning_tuna.git learning_tuna
+pi install --local ./learning_tuna
+pi
+```
+
+If the app is already cloned into `root/learning_tuna/`, skip `git clone`. Local registration is needed only once.
+**Cloning into a child folder does not automatically load the app when you start Pi from root.** Pi does not discover the child app's `.pi` configuration automatically; use `pi install --local` to register it in the study root.
+
+Approve project trust after registration. If Pi is already running in root, run `/reload`. Then run inside Pi:
+
+```text
+/learn init
+/learn track
+/learn today
+```
+
+Point the agent to files under `materials/` or other paths in root. You do not need to change into the app's `learning_tuna/` directory.
+
+- App code: `root/learning_tuna/`.
+- Plans and study records: **`root/learning/`**.
+- Obsidian home page: **`root/learning/index.md`**.
+- Next day: start `pi` from the same **root**, then run `/learn today`.
+
+Starting Pi inside the cloned app instead creates separate records in `root/learning_tuna/learning/`. Do not mix working directories for the same course.
+If root is under Git, add **`learning/` to root's own `.gitignore`** to keep personal records out of version control. The child app's `.gitignore` does not cover records in the parent root. Back up records separately.
+
 ## Getting started
 
 ### 1. Run the app and connect an AI provider
 
-From the app root, run in your **terminal**:
+For **standalone use**, run from the app root in your terminal. If you registered the app in a **study root**, run `pi` from that study root instead of the app directory:
 
 ```sh
 cd learning-tuna
@@ -59,7 +103,7 @@ If you are already in the app root, run only `pi`. Review the project code and a
 If no AI provider is connected, use `/login` **inside Pi**, then `/model` to choose a model.
 
 If Pi is already running in this directory, use `/reload` **inside Pi** to load updates. Avoid duplicate installations that register the same `/learn` command or Skill name.
-Always start Pi from the app root. Personal data is stored in `learning/` relative to Pi's working directory.
+Always use the same working directory for your chosen setup. Personal data is stored in `learning/` relative to Pi's working directory.
 
 ### 2. Create your first learning plan
 
@@ -83,7 +127,7 @@ Weekday input uses `0` for Sunday through `6` for Saturday, separated by commas,
 
 ### 3. Return the next day
 
-Start `pi` from the same app directory and run `/learn today` inside Pi. A new conversation can continue from saved records.
+Start `pi` from the same learning workspace (the standalone app directory or registered study root) and run `/learn today` inside Pi. A new conversation can continue from saved records.
 **Do not run `/learn init` every day.** If your goal or duration changes, first tell the agent that you want to revise the existing plan.
 
 ### Command reference
@@ -103,7 +147,7 @@ Start `pi` from the same app directory and run `/learn today` inside Pi. A new c
 
 The Korean arguments `기초부터` and `목표부터` are the currently supported command spellings; do not replace them with English translations.
 Use `/learn schedule` if the agent cannot execute the local materializer, or if you want another document snapshot. An approved `learning/schedule.json` must already exist.
-If `/learn` is unavailable, check that Pi was started from the app root, approve project trust, and run `/reload`.
+If `/learn` is unavailable, check your chosen working directory and, for study-root use, the local package registration. Approve project trust and run `/reload`.
 
 ## How initial planning works
 

@@ -4,7 +4,7 @@
 
 개인 프로젝트 폴더에서 Pi를 실행하여 학습 계획을 만들고, 복습·확인·적용을 반복하며 기록을 이어갑니다. 쉬었다면 두 회차를 강제하지 않고 미완료 회차부터 진행합니다.
 
-Run Pi from this app's directory to plan your learning, practice recall and application, and continue from saved records. Missed days shift remaining dates instead of forcing doubled catch-up work.
+Run Pi from this app's directory, or register it locally in a study workspace, to plan your learning, practice recall and application, and continue from saved records. Missed days shift remaining dates instead of forcing doubled catch-up work.
 
 ## 설명서 선택 / Choose your guide
 
@@ -14,6 +14,8 @@ Run Pi from this app's directory to plan your learning, practice recall and appl
 | English | [English installation and user guide](README.en.md) |
 
 두 설명서는 설치, 첫 계획 수립, 일일 학습, 완료 확인, 유연한 진도, Obsidian 사용 및 현재 제한 사항을 안내합니다.
+
+자료가 있는 상위 root에서 Pi를 실행하려면 클론 후 로컬 등록이 필요합니다: [한국어 안내](README.ko.md#study-root) · [English instructions](README.en.md#study-root).
 
 Both guides cover installation, initial planning, daily learning, completion confirmation, flexible progress, Obsidian, and current limitations.
 
