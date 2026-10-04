@@ -26,6 +26,17 @@ export interface Quest {
   approach: LearningMode;
 }
 
+export function learningModeLabel(mode: LearningMode): string {
+  return mode === "bottom-up" ? "기초부터" : "목표부터";
+}
+
+export function parseLearningApproach(value: string | undefined): LearningMode | undefined {
+  if (value === undefined) return undefined;
+  if (value === "기초부터") return "bottom-up";
+  if (value === "목표부터") return "top-down";
+  throw new Error("진행 방식은 '기초부터' 또는 '목표부터'를 선택하세요.");
+}
+
 export function isLearningMode(value: unknown): value is LearningMode {
   return value === "bottom-up" || value === "top-down";
 }
@@ -131,7 +142,7 @@ export function renderNote(plan: LearningPlan): string {
   const quest = selectQuest(plan);
   return [
     "# Learning map", "", plan.goal, "",
-    `Mode: ${plan.mode}`, `Daily budget: ${plan.dailyMinutes} minutes`, "",
+    `진행: ${learningModeLabel(plan.mode)}`, `Daily budget: ${plan.dailyMinutes} minutes`, "",
     renderMap(plan), "", "## Suggested quest", "",
     quest ? `**${quest.title}**\n\n${quest.question}` : "Target marked as understood.", "",
     "## Reflection", "", "- My attempt:", "- What blocked me:", "- What I can explain now:", "",

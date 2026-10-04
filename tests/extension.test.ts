@@ -10,6 +10,7 @@ import { readPlan, planPath } from "../src/storage.ts";
 test("command scaffold initializes, selects both paths, exports, and preserves existing data", async () => {
   const cwd = await mkdtemp(join(tmpdir(), "learning-tuna-test-"));
   const messages: string[] = [];
+  const requests: string[] = [];
   const errors: string[] = [];
   let handler: (args: string, ctx: ExtensionCommandContext) => Promise<void>;
   const api = {
@@ -18,18 +19,23 @@ test("command scaffold initializes, selects both paths, exports, and preserves e
       handler = command.handler;
     },
     sendMessage(message: { content: string }) { messages.push(message.content); },
+    sendUserMessage(message: string) { requests.push(message); },
   } as unknown as ExtensionAPI;
   const context = {
     cwd,
+    isIdle: () => true,
     ui: { notify(message: string) { errors.push(message); } },
   } as unknown as ExtensionCommandContext;
 
   learningExtension(api);
-  await handler!("init bottom-up", context);
+  await handler!("init", context);
+  assert.match(requests[0], /initial schedule intake/);
+  await assert.rejects(readPlan(planPath(cwd)), { code: "ENOENT" });
+  await handler!("demo 기초부터", context);
   assert.equal((await readPlan(planPath(cwd))).mode, "bottom-up");
   await handler!("today", context);
   assert.match(messages.at(-1)!, /\[mean\]/);
-  await handler!("today top-down", context);
+  await handler!("today 목표부터", context);
   assert.match(messages.at(-1)!, /\[weighted-mean\]/);
   assert.equal((await readPlan(planPath(cwd))).mode, "bottom-up");
   await handler!("map", context);
@@ -42,7 +48,7 @@ test("command scaffold initializes, selects both paths, exports, and preserves e
   assert.deepEqual(errors, []);
 
   const before = await readFile(planPath(cwd), "utf8");
-  await handler!("init top-down", context);
+  await handler!("demo 목표부터", context);
   assert.equal(errors.length, 1);
   assert.equal(await readFile(planPath(cwd), "utf8"), before);
   await handler!("today sideways", context);
