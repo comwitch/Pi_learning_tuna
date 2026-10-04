@@ -1,0 +1,15 @@
+{
+  "name": "learning-tuna",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A Pi learning extension with bottom-up and top-down learning paths.",
+  "keywords": ["pi-package"],
+  "engines": { "node": ">=22.19.0" },
+  "scripts": { "test": "node --experimental-strip-types --test tests/*.test.ts" },
+  "peerDependencies": { "@earendil-works/pi-coding-agent": "*" },
+  "pi": {
+    "extensions": ["./src/extension.ts"],
+    "skills": ["./skills/learn"]
+  }
+}

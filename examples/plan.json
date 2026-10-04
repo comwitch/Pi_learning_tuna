@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "mode": "bottom-up",
+  "goal": "Explain why a weighted mean depends more on observations with larger weights.",
+  "targetId": "weighted-mean",
+  "dailyMinutes": 10,
+  "concepts": [
+    {
+      "id": "mean",
+      "title": "Arithmetic mean",
+      "prerequisites": [],
+      "status": "unknown",
+      "question": "What is the mean of 2 and 8, and why?"
+    },
+    {
+      "id": "weights",
+      "title": "Relative weights",
+      "prerequisites": ["mean"],
+      "status": "unknown",
+      "question": "How could repeating an observation change its influence on the mean?"
+    },
+    {
+      "id": "weighted-mean",
+      "title": "Weighted mean",
+      "prerequisites": ["weights"],
+      "status": "unknown",
+      "question": "Combine 2 and 8 with weights 3 and 1. Explain which observation has more influence."
+    }
+  ]
+}
