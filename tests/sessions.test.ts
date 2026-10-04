@@ -57,6 +57,42 @@ test("creates one linked folder per session and restarts numbering on the next d
   }
 });
 
+test("primary session note presents review material before collapsed process links", async () => {
+  const cwd = await workspace();
+  const session = await createStudySession(cwd, schedule(), new Date(2026, 6, 9, 12));
+  const note = await readFile(join(session.directory, "index.md"), "utf8");
+  const collapsed = note.indexOf("> [!info]-");
+  for (const heading of ["## 학습 목표", "## 핵심 개념", "## 상세 설명", "## 복습 포인트"]) {
+    assert.ok(note.indexOf(heading) >= 0 && note.indexOf(heading) < collapsed);
+  }
+  assert.match(note, /Practice a mathematical idea/);
+  assert.match(note, /LaTeX/);
+  assert.match(note, /Mermaid/);
+  assert.doesNotMatch(note.slice(0, collapsed), /\]\((review|lesson|quiz|practice|reflection|handoff)\.md\)/);
+  assert.match(note.slice(collapsed), /> - \[ \] \[1\. 기억에서 복습\]/);
+  const progress = await readFile(join(session.directory, "lesson.md"), "utf8");
+  assert.match(progress, /\[복습용 학습 노트\]\(index\.md\)/);
+  const home = await readFile(session.homePath, "utf8");
+  assert.match(home, /복습용 학습 노트/);
+  assert.doesNotMatch(home, /handoff\.md/);
+});
+
+test("native math and Mermaid example remains intact when the home page refreshes", async () => {
+  const cwd = await workspace();
+  const day = new Date(2026, 6, 9, 12);
+  const session = await createStudySession(cwd, schedule(), day);
+  const example = await readFile(new URL("../examples/obsidian-note.md", import.meta.url), "utf8");
+  assert.match(example, /^\$\$$/m);
+  assert.match(example, /\\bar\{x\}_w/);
+  assert.match(example, /```mermaid\nflowchart LR/);
+  assert.match(example, /3\.5/);
+  assert.doesNotMatch(example, /^(User|Assistant):/m);
+  await writeFile(join(session.directory, "index.md"), example);
+  await updateHome(cwd, day);
+  await createStudySession(cwd, schedule(), day);
+  assert.equal(await readFile(join(session.directory, "index.md"), "utf8"), example);
+});
+
 test("serializes session allocation and orders double-digit session numbers numerically", async () => {
   const cwd = await workspace();
   const day = new Date(2026, 6, 9, 12);

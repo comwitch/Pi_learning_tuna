@@ -200,7 +200,7 @@ The agent is instructed to read:
 - The latest complete planner, syllabus, and initial handoff snapshot.
 - The latest substantive session records, not the current folder's empty templates.
 
-The syllabus stays concise, but **explanations and feedback should be detailed**. The Skill asks the agent to preserve questions, reasoning, assumptions, misconceptions, evidence, unresolved gaps, and next actions. Continuation should not depend on remembering the previous chat.
+The syllabus stays concise, but **explanations and feedback should be detailed**. The primary review note contains goals, coherent explanations, and review points, not a chat transcript. Concise attempts, misconceptions, understanding evidence, and unresolved gaps remain in supporting progress and handoff records. Continuation should not depend on remembering the previous chat.
 
 Duration estimation, source interpretation, draft writing, and lesson recording are **agent-guided steps**, not deterministic guarantees. Real-source teaching accuracy and record completeness have not been validated end to end. Saving failures must be disclosed; dates and mastery must not advance automatically.
 
@@ -214,7 +214,7 @@ After recording the lesson, run inside Pi, replacing the example with your actua
 /learn finish 20260709_1
 ```
 
-Select a status in the UI, enter the actual date and what you did or what remains, then confirm:
+Select a status and summarize what you did or what remains. The app **automatically offers today's device-local date**: select it and confirm without typing the date. To record an earlier lesson, choose **다른 날짜** (another date), enter `YYYYMMDD`, and confirm:
 
 - **완료** — completed: advance to the next lesson.
 - **부분학습** — partial: continue the remaining work in this lesson.
@@ -247,8 +247,9 @@ Legacy folders created before tracking are not automatically counted or assigned
 
 | Step | File | Content |
 |---|---|---|
+| Review note | `index.md` | Goals, concepts, detailed explanations, equations, diagrams, and review points on one page |
 | Recall | `review.md` | Retrieve a prior concept without notes; check prerequisites in the first lesson |
-| Learn | `lesson.md` | Concepts, assumptions, reasoning, and connections |
+| Learning progress | `lesson.md` | Actual source scope and unfinished work; read the explanation in `index.md` |
 | Check | `quiz.md` | One or two unassisted questions, attempts, and feedback |
 | Apply | `practice.md` | Math problems/derivations, computing implementations/tests, or English writing/speaking |
 | Reflect | `reflection.md` | Understanding evidence, unresolved questions, and review candidates |
@@ -263,7 +264,7 @@ learning/
 ├── index.md                 # Home page
 └── sessions/
     ├── 20260709_1/
-    │   ├── index.md         # Learning-loop links and checkboxes
+    │   ├── index.md         # Single-page review note; process links collapsed
     │   ├── review.md
     │   ├── lesson.md
     │   ├── quiz.md
@@ -274,7 +275,15 @@ learning/
     └── 20260709_2/
 ```
 
-Open `learning/index.md` as your home page in Obsidian. Follow **today's learning → the session's index → individual steps**. The home page also links planning documents and earlier sessions. Relative Markdown links survive moving the entire folder together.
+Open `learning/index.md` as your home page in Obsidian and select **today's review note**. The session's `index.md` presents the explanation on one page. Supporting process, attempt, and handoff links live in a collapsed callout at the bottom; expand it only when needed. The home page also links planning documents and earlier sessions. Relative Markdown links survive moving the entire folder together.
+
+### Equations and relationship diagrams
+
+- Math uses inline `$...$` or display equations between standalone `$$` lines, with symbols, assumptions, and units explained nearby.
+- Relationship diagrams use fenced `mermaid` source next to the relevant explanation, with a sentence explaining the arrows. Check them in Obsidian Reading view.
+- Relevant code uses language-tagged fences, without automatic execution. This change does not add image generation or uploads.
+
+Open [the weighted-mean review-note example](examples/obsidian-note.md) in Obsidian to see equations and a diagram within a single explanation. It is a layout example, not actual learning evidence. New sessions receive this format; existing personal notes are not automatically rewritten.
 
 Personal notes outside the marked generated section are preserved. An existing unrelated `index.md` without those markers is not overwritten; the app reports an error instead. Date-dependent links refresh with `/learn today` or `/learn home`, not automatically at midnight.
 

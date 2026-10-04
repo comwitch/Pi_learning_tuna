@@ -52,11 +52,13 @@ test("partial and not-studied outcomes do not advance; resume preserves the exis
   await configure(cwd);
   const session = await createStudySession(cwd, schedule(), day(6));
   await writeFile(join(session.directory, "lesson.md"), "Actual partial reasoning");
+  await writeFile(join(session.directory, "index.md"), "Existing personal note with its own layout");
   await report(cwd, session.id, "partial", 6);
   const resumed = await createStudySession(cwd, schedule(), day(8));
   assert.equal(resumed.id, session.id);
   assert.equal(resumed.resumed, true);
   assert.equal(await readFile(join(resumed.directory, "lesson.md"), "utf8"), "Actual partial reasoning");
+  assert.equal(await readFile(join(resumed.directory, "index.md"), "utf8"), "Existing personal note with its own layout");
   assert.equal((await getProgress(cwd, day(8)))?.nextLesson, 1);
   await report(cwd, session.id, "not-studied", 8);
   assert.equal((await getProgress(cwd, day(8)))?.completedCount, 0);
@@ -138,7 +140,9 @@ test("UI cancellation never confirms learning; explicit finish advances exactly 
     sendMessage(message: { content: string }) { messages.push(message.content); }, sendUserMessage() {},
   } as unknown as ExtensionAPI);
   const ctx = { cwd, hasUI: true, isIdle: () => true, ui: {
-    input: async () => responses.shift(), select: async () => "완료", confirm: async () => approve,
+    input: async () => responses.shift(),
+    select: async (title: string, options: string[]) => title === "이 회차의 실제 학습 상태" ? "완료" : options[0],
+    confirm: async () => approve,
     notify(message: string) { errors.push(message); },
   } } as unknown as ExtensionCommandContext;
   await handler!("track", ctx);
@@ -149,13 +153,62 @@ test("UI cancellation never confirms learning; explicit finish advances exactly 
   await handler!("today", ctx);
   const session = (await getProgress(cwd))!.pendingSession!;
   approve = false;
-  responses.push("Solved a question and reflected; uncertainties recorded", today);
+  responses.push("Solved a question and reflected; uncertainties recorded");
   await handler!(`finish ${session.id}`, ctx);
   assert.equal((await getProgress(cwd))?.completedCount, 0);
   approve = true;
-  responses.push("Solved a question and reflected; uncertainties recorded", today);
+  responses.push("Solved a question and reflected; uncertainties recorded");
   await handler!(`finish ${session.id}`, ctx);
   assert.equal((await getProgress(cwd))?.completedCount, 1);
   assert.match(messages.at(-1)!, /학습 상태를 기록/);
+  const recorded = (await getProgress(cwd))!.sessions.find((item) => item.id === session.id)!;
+  assert.equal(recorded.outcomes[0].studiedOn, today);
+  assert.equal(responses.length, 0);
+  assert.deepEqual(errors, []);
+});
+
+test("date selection cancellation preserves progress and another date remains explicitly editable", async () => {
+  const cwd = await workspace();
+  await mkdir(join(cwd, "learning"));
+  await writeFile(join(cwd, "learning", "schedule.json"), JSON.stringify(schedule()));
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const pastDate = localDateKey(yesterday);
+  await initializeTracking(cwd, schedule(), { startDate: pastDate, totalLessons: 1, weekdays: [0, 1, 2, 3, 4, 5, 6], userConfirmed: true });
+  const session = await createStudySession(cwd, schedule(), now);
+  const inputs: (string | undefined)[] = [];
+  const errors: string[] = [];
+  const confirmations: string[] = [];
+  let dateChoice: string | undefined;
+  let handler: (args: string, ctx: ExtensionCommandContext) => Promise<void>;
+  learningExtension({ registerCommand(_name: string, command: { handler: typeof handler }) { handler = command.handler; },
+    sendMessage() {}, sendUserMessage() {},
+  } as unknown as ExtensionAPI);
+  const ctx = { cwd, hasUI: true, isIdle: () => true, ui: {
+    input: async () => inputs.shift(),
+    select: async (title: string) => title === "이 회차의 실제 학습 상태" ? "부분학습" : dateChoice,
+    confirm: async (_title: string, message: string) => { confirmations.push(message); return true; },
+    notify(message: string) { errors.push(message); },
+  } } as unknown as ExtensionCommandContext;
+
+  inputs.push("Some work was attempted");
+  await handler!(`finish ${session.id}`, ctx);
+  assert.equal(confirmations.length, 0);
+  assert.equal((await getProgress(cwd))!.sessions[0].outcomes.length, 0);
+
+  dateChoice = "다른 날짜";
+  inputs.push("Some work was attempted", undefined);
+  await handler!(`finish ${session.id}`, ctx);
+  assert.equal(confirmations.length, 0);
+  assert.equal((await getProgress(cwd))!.sessions[0].outcomes.length, 0);
+
+  inputs.push("Work attempted offline yesterday; recording it now", pastDate);
+  await handler!(`finish ${session.id}`, ctx);
+  assert.match(confirmations[0], new RegExp(pastDate));
+  const recorded = (await getProgress(cwd))!.sessions[0];
+  assert.equal(recorded.outcomes[0].studiedOn, pastDate);
+  assert.equal(recorded.status, "partial");
+  assert.equal((await getProgress(cwd))!.completedCount, 0);
   assert.deepEqual(errors, []);
 });
